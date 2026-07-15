@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "numiit-backend"
+version = "0.1.0"
+description = "NumiIT backend API scaffold"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi[standard]>=0.115,<0.116",
+  "uvicorn[standard]>=0.34,<0.35",
+  "pydantic>=2,<3",
+  "pydantic-settings>=2,<3",
+  "sqlalchemy>=2,<3",
+  "alembic>=1,<2",
+  "python-multipart>=0.0.20,<0.1",
+  "python-jose[cryptography]>=3.3,<4",
+  "passlib[bcrypt]>=1.7,<2",
+  "psycopg[binary]>=3.2,<4",
+  "email-validator>=2.0,<3",
+  # ML inference dependencies – install separately if needed:
+  # pip install ultralytics torch torchvision Pillow numpy
+  "Pillow>=10.0,<12",
+  "numpy>=1.24,<3",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*"]
