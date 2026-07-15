@@ -7,9 +7,7 @@ from fastapi import APIRouter, File, Query, UploadFile, HTTPException, status
 router = APIRouter()
 
 # Get project root
-BASE_DIR = Path(
-    os.getenv("APP_ROOT", Path(__file__).resolve().parents[4])
-)
+
 REPO_ROOT = Path(__file__).resolve().parents[4]
 UPLOADS_DIR = REPO_ROOT / "uploads"
 
