@@ -19,3 +19,7 @@ class RegisterRequest(BaseModel):
     name: str
     email: EmailStr
     password: str
+
+class SSOLoginRequest(BaseModel):
+    id_token: str
+

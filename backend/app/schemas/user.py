@@ -19,6 +19,9 @@ class UserUpdate(BaseModel):
 
 class UserRead(UserBase):
     id: int
+    role: str
+    sso_provider: str | None = None
+    sso_id: str | None = None
     created_at: datetime
 
     class Config:

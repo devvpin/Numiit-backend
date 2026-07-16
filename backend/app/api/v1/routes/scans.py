@@ -3,7 +3,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user_optional
+from app.api.deps import get_current_user_optional,get_current_admin_user
 from app.db.session import get_db
 from app.models.user import User
 from app.models.scan import Scan
@@ -114,6 +114,14 @@ def list_scans(
     scans = query_db.all()
     return [map_scan_to_schema(s) for s in scans]
 
+@router.get("/all", response_model=list[ScanRead])
+def list_all_scans_admin(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user),
+) -> list[ScanRead]:
+    scans = db.query(Scan).order_by(Scan.scanned_at.desc()).all()
+    return [map_scan_to_schema(s) for s in scans]
+
 
 @router.get("/{id}", response_model=ScanRead)
 def get_scan(
@@ -130,8 +138,11 @@ def get_scan(
             detail="Scan not found",
         )
 
-    # Authorization check
-    if scan.user_email != email and scan.id > 3:
+    # # Authorization check
+    # if scan.user_email != email and scan.id > 3:
+    # Authorization check: Owner or Admin
+    is_admin = current_user is not None and current_user.role == "admin"
+    if scan.user_email != email and scan.id > 3 and not is_admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not authorized to access this scan",
@@ -156,8 +167,11 @@ def update_scan(
             detail="Scan not found",
         )
 
-    # Authorization check
-    if scan.user_email != email:
+    # # Authorization check
+    # if scan.user_email != email:
+    # Authorization check: Owner or Admin
+    is_admin = current_user is not None and current_user.role == "admin"
+    if scan.user_email != email and not is_admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not authorized to modify this scan",
@@ -192,8 +206,11 @@ def delete_scan(
             detail="Scan not found",
         )
 
-    # Authorization check
-    if scan.user_email != email:
+    # # Authorization check
+    # if scan.user_email != email:
+     # Authorization check: Owner or Admin
+    is_admin = current_user is not None and current_user.role == "admin"
+    if scan.user_email != email and not is_admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not authorized to delete this scan",

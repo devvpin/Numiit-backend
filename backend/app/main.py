@@ -49,6 +49,77 @@ def ensure_database_exists() -> None:
             else:
                 print(f"Database connection error: {e}")
 
+def patch_users_table_columns() -> None:
+    from sqlalchemy import text, inspect
+    from app.db.session import engine
+    
+    inspector = inspect(engine)
+    if "users" in inspector.get_table_names():
+        columns = [c["name"] for c in inspector.get_columns("users")]
+        with engine.begin() as conn:
+            if "role" not in columns:
+                try:
+                    conn.execute(text("ALTER TABLE users ADD COLUMN role VARCHAR(50) NOT NULL DEFAULT 'user'"))
+                    print("Patched column 'role' in users table.")
+                except Exception as e:
+                    print(f"Error patching 'role': {e}")
+                    
+            if "sso_provider" not in columns:
+                try:
+                    conn.execute(text("ALTER TABLE users ADD COLUMN sso_provider VARCHAR(50)"))
+                    print("Patched column 'sso_provider' in users table.")
+                except Exception as e:
+                    print(f"Error patching 'sso_provider': {e}")
+                    
+            if "sso_id" not in columns:
+                try:
+                    conn.execute(text("ALTER TABLE users ADD COLUMN sso_id VARCHAR(255)"))
+                    print("Patched column 'sso_id' in users table.")
+                except Exception as e:
+                    print(f"Error patching 'sso_id': {e}")
+
+
+def seed_default_users() -> None:
+    from sqlalchemy.orm import Session
+    from app.db.session import SessionLocal
+    from app.models.user import User
+    from app.core.security import hash_password
+    
+    db = SessionLocal()
+    try:
+        # Seed Admin
+        admin_email = "admin@gmail.com"
+        admin = db.query(User).filter(User.email == admin_email).first()
+        if not admin:
+            admin = User(
+                email=admin_email,
+                name="Admin User",
+                hashed_password=hash_password("adminpassword"),
+                role="admin"
+            )
+            db.add(admin)
+            db.commit()
+            print("Seeded admin user.")
+            
+        # Seed Standard User
+        user_email = "user@gmail.com"
+        std_user = db.query(User).filter(User.email == user_email).first()
+        if not std_user:
+            std_user = User(
+                email=user_email,
+                name="Standard User",
+                hashed_password=hash_password("userpassword"),
+                role="user"
+            )
+            db.add(std_user)
+            db.commit()
+            print("Seeded standard user.")
+    except Exception as e:
+        print(f"Error during seeding: {e}")
+        db.rollback()
+    finally:
+        db.close()
+
 
 def create_app() -> FastAPI:
     # Auto-create database if not exists
@@ -56,6 +127,11 @@ def create_app() -> FastAPI:
 
     # Auto-create tables on startup
     Base.metadata.create_all(bind=engine)
+
+    # Run user table patches & seeds
+    patch_users_table_columns()
+    seed_default_users()
+
 
     # Database is initialized in ensure_database_exists and create_all
     # Ensure uploads directory exists
