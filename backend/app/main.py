@@ -10,9 +10,9 @@ from app.db.session import engine
 from app.models import User, Scan
 
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
+REPO_ROOT = Path(__file__).resolve().parents[1]
 FRONTEND_WEB_BUILD = REPO_ROOT / "frontend" / "build" / "web"
-UPLOADS_DIR = REPO_ROOT / "backend" / "uploads"
+UPLOADS_DIR = REPO_ROOT / "uploads"
 
 
 def ensure_database_exists() -> None:
