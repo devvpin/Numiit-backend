@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.config import get_settings
 from app.core.security import hash_password, verify_password, create_access_token
 from app.db.session import get_db
 from app.models.user import User
@@ -47,6 +48,7 @@ def login(request: LoginRequest, db: Session = Depends(get_db)) -> Token:
     # Create access token
     access_token = create_access_token(subject=user.email)
     return Token(access_token=access_token, token_type="bearer")
+
 
 import urllib.request
 import urllib.parse
@@ -132,8 +134,9 @@ def sso_google(request: SSOLoginRequest, db: Session = Depends(get_db)) -> Token
 @router.get("/sso/google/login")
 def google_sso_login():
     # Redirects the browser directly to Google's authentication page.
-    client_id = os.getenv("GOOGLE_CLIENT_ID", "dummy_client_id")
-    redirect_uri = "http://localhost:8000/api/v1/auth/sso/google/callback"
+    settings = get_settings()
+    client_id = settings.google_client_id
+    redirect_uri = settings.sso_redirect_uri
     
     auth_url = (
         "https://accounts.google.com/o/oauth2/v2/auth?"
@@ -149,9 +152,10 @@ def google_sso_login():
 
 @router.get("/sso/google/callback")
 def google_sso_callback(code: str, db: Session = Depends(get_db)):
-    client_id = os.getenv("GOOGLE_CLIENT_ID", "dummy_client_id")
-    client_secret = os.getenv("GOOGLE_CLIENT_SECRET", "dummy_client_secret")
-    redirect_uri = "http://localhost:8000/api/v1/auth/sso/google/callback"
+    settings = get_settings()
+    client_id = settings.google_client_id
+    client_secret = settings.google_client_secret
+    redirect_uri = settings.sso_redirect_uri
     
     token_url = "https://oauth2.googleapis.com/token"
     data = urllib.parse.urlencode({
@@ -188,3 +192,5 @@ def google_sso_callback(code: str, db: Session = Depends(get_db)):
         print(f"Error in SSO callback: {e}")
         
     raise HTTPException(status_code=400, detail="SSO authentication failed")
+
+

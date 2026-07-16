@@ -1,0 +1,51 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment files
+.env
+.env.*
+!.env.example
+backend/.env
+backend/.env.*
+!backend/.env.example
+backend/.venv.*
+
+# Tooling caches
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
+
+# Build and packaging outputs
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# IDE and OS files
+.vscode/
+.idea/
+.DS_Store
+
+# Local database files
+*.sqlite3
+*.db
+
+# Frontend outputs
+frontend/**/.dart_tool/
+frontend/**/.flutter-plugins
+frontend/**/.flutter-plugins-dependencies
+frontend/**/build/
+frontend/**/node_modules/

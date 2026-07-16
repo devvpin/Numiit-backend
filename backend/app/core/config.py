@@ -13,10 +13,19 @@ class Settings(BaseSettings):
 
     app_name: str = "NumiIT API"
     environment: str = "development"
-    database_url: str = "postgresql+psycopg://postgres:postgres@localhost:5432/numiit"
-    secret_key: str = "change-me"
+    database_url: str = "sqlite:///./numiit.db"
+    secret_key: str = "REPLACE-ME-IN-ENV-FILE"
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 60
+
+    # Google SSO (OAuth 2.0)
+    google_client_id: str = ""
+    google_client_secret: str = ""
+    sso_redirect_uri: str = "http://localhost:8000/api/v1/auth/sso/google/callback"
+
+    # Default seed user passwords
+    admin_seed_password: str = "adminpassword"
+    user_seed_password: str = "userpassword"
 
     @field_validator("database_url", mode="before")
     @classmethod

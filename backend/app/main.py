@@ -10,9 +10,9 @@ from app.db.session import engine
 from app.models import User, Scan
 
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 FRONTEND_WEB_BUILD = REPO_ROOT / "frontend" / "build" / "web"
-UPLOADS_DIR = REPO_ROOT / "uploads"
+UPLOADS_DIR = REPO_ROOT / "backend" / "uploads"
 
 
 def ensure_database_exists() -> None:
@@ -49,6 +49,7 @@ def ensure_database_exists() -> None:
             else:
                 print(f"Database connection error: {e}")
 
+
 def patch_users_table_columns() -> None:
     from sqlalchemy import text, inspect
     from app.db.session import engine
@@ -84,7 +85,9 @@ def seed_default_users() -> None:
     from app.db.session import SessionLocal
     from app.models.user import User
     from app.core.security import hash_password
+    from app.core.config import get_settings
     
+    settings = get_settings()
     db = SessionLocal()
     try:
         # Seed Admin
@@ -94,7 +97,7 @@ def seed_default_users() -> None:
             admin = User(
                 email=admin_email,
                 name="Admin User",
-                hashed_password=hash_password("adminpassword"),
+                hashed_password=hash_password(settings.admin_seed_password),
                 role="admin"
             )
             db.add(admin)
@@ -108,7 +111,7 @@ def seed_default_users() -> None:
             std_user = User(
                 email=user_email,
                 name="Standard User",
-                hashed_password=hash_password("userpassword"),
+                hashed_password=hash_password(settings.user_seed_password),
                 role="user"
             )
             db.add(std_user)
@@ -127,13 +130,11 @@ def create_app() -> FastAPI:
 
     # Auto-create tables on startup
     Base.metadata.create_all(bind=engine)
-
+    
     # Run user table patches & seeds
     patch_users_table_columns()
     seed_default_users()
 
-
-    # Database is initialized in ensure_database_exists and create_all
     # Ensure uploads directory exists
     UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
 
