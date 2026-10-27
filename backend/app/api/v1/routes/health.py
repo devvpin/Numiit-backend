@@ -5,11 +5,7 @@ router = APIRouter()
 
 @router.get("/health")
 def health_check() -> dict:
-    import sys
-    diagnostics = {
-        "executable": sys.executable,
-        "prefix": sys.prefix,
-    }
+    diagnostics = {}
     
     # Try importing cv2
     try:
@@ -41,13 +37,11 @@ def health_check() -> dict:
         
     # Try importing ml_inference
     try:
-        from app.services.ml_inference import infer_coin, infer_paired_coins
+        from app.services.ml_inference import infer_coin
         diagnostics["ml_inference"] = "ok"
-        diagnostics["paired_inference"] = "ok"
     except Exception as e:
         import traceback
         diagnostics["ml_inference"] = f"error: {e}\n{traceback.format_exc()}"
-        diagnostics["paired_inference"] = f"error: {e}\n{traceback.format_exc()}"
 
     return {
         "status": "ok",

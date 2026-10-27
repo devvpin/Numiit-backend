@@ -57,25 +57,6 @@ CHAR_MODEL_PATH = (
     / "best.pt"
 )
 
-COIN_CLASSIFIER_PATH = (
-    _MODEL_ROOT
-    / "coins_classification"
-    / "best_model.pth"
-)
-
-# Method 1 Two-Sided (Paired) Model Directory (stored in coins_classification)
-if (_BACKEND_ROOT / "coins_classification" / "final_summary.json").exists():
-    PAIRED_COIN_DIR = _BACKEND_ROOT / "coins_classification"
-elif (_MODEL_ROOT / "coins_classification" / "final_summary.json").exists():
-    PAIRED_COIN_DIR = _MODEL_ROOT / "coins_classification"
-elif (_MODEL_ROOT / "coins_classification" / "joint_siamese_224.pth").exists():
-    PAIRED_COIN_DIR = _MODEL_ROOT / "coins_classification"
-elif (_BACKEND_ROOT.parent / "final").exists():
-    PAIRED_COIN_DIR = _BACKEND_ROOT.parent / "final"
-else:
-    PAIRED_COIN_DIR = _REPO_ROOT / "final"
-
-
 # ─────────────────────────────────────────────────────────────────────────────
 # Dynasty / era context lookup for coin classes
 #
@@ -84,465 +65,135 @@ else:
 # ─────────────────────────────────────────────────────────────────────────────
 
 ERA_CONTEXT: dict[str, dict] = {
-    # ── Table 1 Chronological Order of Western Kshatrapa Kings & Fathers ──
-    "chastana": {
-        "era": "Chastana",
-        "dynasty": "Western Kshatrapas (c. 78–130 CE)",
-        "script": "Brahmi & Kharoshthi",
-        "transliteration": "Rājño Kṣatrapasa Chastaṇa",
-        "translation": "Satrap Chastana",
-        "description": "Founder of the Kardamaka dynasty; silver dramma with bilingual Brahmi and Kharoshthi legends.",
-        "father": "Zamotika",
-        "legend": "rajnoksatrapasazamotikaputrasachastanasa",
-        "rules": [
-            "Identified by father Zamotika (zamotikaputrasa).",
-            "Bilingual legend using Brahmi on reverse and Greek/Kharoshthi elements."
-        ]
-    },
-    "damazada_i": {
-        "era": "Damazada I",
-        "dynasty": "Western Kshatrapas (c. 130–140 CE)",
-        "script": "Brahmi",
-        "transliteration": "Rājño Kṣatrapasa Dāmazada",
-        "translation": "Satrap Damazada I",
-        "description": "Early Kardamaka ruler; brother or contemporary of Chastana lineage.",
-        "father": "Zamotika",
-        "legend": "rajnoksatrapasazamotikaputrasadamazadasa",
-        "rules": [
-            "Identified by father Zamotika (zamotikaputrasa).",
-            "Holds the title Ksatrapa (rajnoksatrapasa)."
-        ]
-    },
-    "jayadaman": {
-        "era": "Jayadaman",
-        "dynasty": "Western Kshatrapas (c. 130–140 CE)",
-        "script": "Brahmi",
-        "transliteration": "Rājño Kṣatrapasa Jayadāman",
-        "translation": "Satrap Jayadaman",
-        "description": "Satrap whose father is recorded as Unknown in Table 1; coins are comparatively rare.",
-        "father": "Unknown",
-        "legend": "rajnoksatrapasajayadamanasa",
-        "rules": [
-            "Father listed as Unknown in royal table sequence.",
-            "Ruler holds the title Ksatrapa (Satrap) instead of Mahaksatrapa."
-        ]
-    },
-    "rudradaman_i": {
-        "era": "Rudradaman I",
-        "dynasty": "Western Kshatrapas (c. 130–150 CE)",
-        "script": "Brahmi",
-        "transliteration": "Rājño Mahākṣatrapasa Rudradāman",
-        "translation": "Great Satrap Rudradaman I",
-        "description": "Celebrated ruler who defeated Satavahanas and authored the historic Junagadh rock inscription.",
-        "father": "Jayadaman",
-        "legend": "rajnoksatrapasajayadamaputrasarajnomahaksatrapasarudradamasa",
-        "rules": [
-            "Identified by father Jayadaman (jayadamaputrasa).",
-            "Ruler's name is Rudradamasa with title Mahaksatrapasa."
-        ]
-    },
-    "rudradaman": {
-        "era": "Rudradaman I",
-        "dynasty": "Western Kshatrapas (c. 130–150 CE)",
-        "script": "Brahmi",
-        "transliteration": "Rājño Mahākṣatrapasa Rudradāman",
-        "translation": "Great Satrap Rudradaman I",
-        "description": "Celebrated ruler who defeated Satavahanas and authored the historic Junagadh rock inscription.",
-        "father": "Jayadaman",
-        "legend": "rajnoksatrapasajayadamaputrasarajnomahaksatrapasarudradamasa",
-        "rules": [
-            "Identified by father Jayadaman (jayadamaputrasa)."
-        ]
-    },
-    "damazada_ii": {
-        "era": "Damazada II",
-        "dynasty": "Western Kshatrapas (c. 178–197 CE)",
-        "script": "Brahmi",
-        "transliteration": "Rājño Mahākṣatrapasa Dāmazada",
-        "translation": "Great Satrap Damazada II",
-        "description": "Son of Rudradaman I, ruling as Ksatrapa and Mahaksatrapa.",
-        "father": "Rudradaman",
-        "legend": "rajnomahaksatrapasarudradamaputrasarajnoksatrapasadamazadasa",
-        "rules": [
-            "Identified by father Rudradaman (rudradamaputrasa).",
-            "Coins show both Ksatrapa and Mahaksatrapa titles."
-        ]
-    },
-    "damajadasri_i": {
-        "era": "Damajadasri I (Damazada II)",
-        "dynasty": "Western Kshatrapas (c. 178–197 CE)",
-        "script": "Brahmi",
-        "transliteration": "Rājño Mahākṣatrapasa Dāmajadaśrī",
-        "translation": "Great Satrap Damajadasri I",
-        "description": "Standardised the silver dramma coinage format with Saka era dates.",
-        "father": "Rudradaman",
-        "legend": "rajnomahaksatrapasarudradamaputrasarajnomahaksatrapasadamajadasriyasa",
-        "rules": [
-            "Identified by father Rudradaman (rudradamaputrasa)."
-        ]
-    },
-    "rudrasimha_i": {
-        "era": "Rudrasimha I",
-        "dynasty": "Western Kshatrapas (c. 178–197 CE)",
-        "script": "Brahmi",
-        "transliteration": "Rājño Mahākṣatrapasa Rudrasiṁha",
-        "translation": "Great Satrap Rudrasimha I",
-        "description": "Prolific coinage establishing dated Saka era numerals on obverse behind the royal bust.",
-        "father": "Rudradaman",
-        "legend": "rajnomahaksatrapasarudradamaputrasarajnomahaksatrapasarudrasihasa",
-        "rules": [
-            "Identified by father Rudradaman (rudradamaputrasa).",
-            "Name appears as Rudrasihasa with title Mahaksatrapasa."
-        ]
-    },
-    "jivadaman": {
-        "era": "Jivadaman",
-        "dynasty": "Western Kshatrapas (c. 178–181, 197–198 CE)",
-        "script": "Brahmi",
-        "transliteration": "Rājño Mahākṣatrapasa Jīvadāman",
-        "translation": "Great Satrap Jivadaman",
-        "description": "Pioneered dated Saka coinage; held two distinct reigns separated by Rudrasimha I.",
-        "father": "Damazada II",
-        "legend": "rajnomahaksatrapasadamazadasaputrasarajnomahaksatrapasajivadamasa",
-        "rules": [
-            "Identified by father Damazada II (damazadaputrasa).",
-            "Title Mahaksatrapasa with name Jivadamasa."
-        ]
-    },
-    "satyadaman": {
-        "era": "Satyadaman",
-        "dynasty": "Western Kshatrapas (c. 198–199 CE)",
-        "script": "Brahmi",
-        "transliteration": "Rājño Kṣatrapasa Satyadāman",
-        "translation": "Satrap Satyadaman",
-        "description": "Brief reign as Ksatrapa; coins are among the rarest in Western Kshatrapa numismatics.",
-        "father": "Damazada II",
-        "legend": "rajnomahaksatrapasadamazadasaputrasarajnoksatrapasasatyadamasa",
-        "rules": [
-            "Identified by father Damazada II (damazadaputrasa).",
-            "Holds the title Ksatrapa with name Satyadamasa."
-        ]
-    },
+    # Rudrasena variants
     "rudrasena_i": {
         "era": "Rudrasena I",
         "dynasty": "Western Kshatrapas (c. 200–222 CE)",
         "script": "Brahmi",
         "transliteration": "Rājño Mahākṣatrapasa Rudrasena",
-        "translation": "Great Satrap Rudrasena I",
+        "translation": "Great King Rudrasena",
         "description": "Silver dramma of Rudrasena I, featuring royal bust obverse and Brahmi legend reverse.",
         "father": "Rudrasimha I",
         "legend": "rajnomahaksatrapasarudrasihaputrasarajnomahaksatrapasarudrasenasa",
         "rules": [
-            "Identified by the phrase Rudrasihaputrasa (son of Rudrasimha I).",
-            "The king's name appears as Rudrasenasa with title Rajno Mahaksatrapasa."
-        ]
-    },
-    "isvaradatta": {
-        "era": "Isvaradatta / Isvaradeva",
-        "dynasty": "Western Kshatrapas (c. 220–222 CE)",
-        "script": "Brahmi",
-        "transliteration": "Rājño Kṣatrapasa Īśvaradeva",
-        "translation": "Satrap Isvaradeva / Isvaradatta",
-        "description": "Documented in royal tables as son of Rudrasimha I; dated regnal issues.",
-        "father": "Rudrasimha I",
-        "legend": "rajnomahaksatrapasarudrasihaputrasarajnoksatrapasaisvaradevassa",
-        "rules": [
-            "Table 1 lists father as Rudrasimha I.",
-            "Coin legend features distinctive Isvaradevassa / Isvaradattasa."
-        ]
-    },
-    "isvaradeva": {
-        "era": "Isvaradeva",
-        "dynasty": "Western Kshatrapas (c. 220–222 CE)",
-        "script": "Brahmi",
-        "transliteration": "Rājño Kṣatrapasa Īśvaradeva",
-        "translation": "Satrap Isvaradeva",
-        "description": "Recorded in chronological Table 1 as son of Rudrasimha I.",
-        "father": "Rudrasimha I",
-        "legend": "rajnomahaksatrapasarudrasihaputrasarajnoksatrapasaisvaradevassa",
-        "rules": [
-            "Table 1 lists father as Rudrasimha I."
-        ]
-    },
-    "prithvisena": {
-        "era": "Prithvisena",
-        "dynasty": "Western Kshatrapas (c. 222 CE)",
-        "script": "Brahmi",
-        "transliteration": "Rājño Kṣatrapasa Pṛthvīsena",
-        "translation": "Satrap Prithvisena",
-        "description": "Short reign as Ksatrapa before Damasena assumed the Mahaksatrapa title.",
-        "father": "Rudrasena I",
-        "legend": "rajnomahaksatrapasarudrasenaputrasarajnoksatrapasaprithvisenasa",
-        "rules": [
-            "Identified by father Rudrasena I (rudrasenaputrasa).",
-            "Name Prithvisenasa with title Ksatrapasa."
-        ]
-    },
-    "damasena": {
-        "era": "Damasena",
-        "dynasty": "Western Kshatrapas (c. 222–236 CE)",
-        "script": "Brahmi",
-        "transliteration": "Rājño Mahākṣatrapasa Dāmasena",
-        "translation": "Great Satrap Damasena",
-        "description": "Patriarch of the mid-dynasty; four of his sons subsequently succeeded him as rulers.",
-        "father": "Rudrasimha I",
-        "legend": "rajnomahaksatrapasarudrasihaputrasarajnomahaksatrapasadamasenasa",
-        "rules": [
-            "Identified by father Rudrasimha I (rudrasihaputrasa).",
-            "Name Damasenasa with title Mahaksatrapasa."
-        ]
-    },
-    "samghadaman": {
-        "era": "Samghadaman",
-        "dynasty": "Western Kshatrapas (c. 222–223 CE)",
-        "script": "Brahmi",
-        "transliteration": "Rājño Mahākṣatrapasa Saṁghadāman",
-        "translation": "Great Satrap Samghadaman",
-        "description": "Brief reign as Mahaksatrapa during succession transitions following Rudrasena I.",
-        "father": "Rudrasimha I",
-        "legend": "rajnomahaksatrapasarudrasihaputrasarajnomahaksatrapasasamghadamasa",
-        "rules": [
-            "Identified by father Rudrasimha I (rudrasihaputrasa).",
-            "Name Samghadamasa with title Mahaksatrapasa."
-        ]
-    },
-    "damajadasri_ii": {
-        "era": "Damajadasri II",
-        "dynasty": "Western Kshatrapas (c. 232–235 CE)",
-        "script": "Brahmi",
-        "transliteration": "Rājño Kṣatrapasa Dāmajadaśrī",
-        "translation": "Satrap Damajadasri II",
-        "description": "Son of Rudrasena I who ruled as Ksatrapa while uncle Damasena held Mahaksatrapa rank.",
-        "father": "Rudrasena I",
-        "legend": "rajnomahaksatrapasarudrasenaputrasarajnoksatrapasadamajadasriyasa",
-        "rules": [
-            "Identified by father Rudrasena I (rudrasenaputrasa).",
-            "Title Ksatrapasa with name Damajadasriyasa."
-        ]
-    },
-    "viradaman": {
-        "era": "Viradaman",
-        "dynasty": "Western Kshatrapas (c. 234–238 CE)",
-        "script": "Brahmi",
-        "transliteration": "Rājño Kṣatrapasa Vīradāman",
-        "translation": "Satrap Viradaman",
-        "description": "Son of Damasena; ruled as Ksatrapa and fathered future Mahaksatrapa Rudrasena II.",
-        "father": "Damasena",
-        "legend": "rajnomahaksatrapasadamasenaputrasarajnoksatrapasaviradamasa",
-        "rules": [
-            "Identified by father Damasena (damasenaputrasa).",
-            "Name Viradamasa with title Ksatrapasa."
-        ]
-    },
-    "yasodaman_i": {
-        "era": "Yasodaman I",
-        "dynasty": "Western Kshatrapas (c. 238–239 CE)",
-        "script": "Brahmi",
-        "transliteration": "Rājño Mahākṣatrapasa Yaśodāman",
-        "translation": "Great Satrap Yasodaman I",
-        "description": "Son of Damasena; briefly advanced from Ksatrapa to Mahaksatrapa in Saka 160–161.",
-        "father": "Damasena",
-        "legend": "rajnomahaksatrapasadamasenaputrasarajnomahaksatrapasayasodamasa",
-        "rules": [
-            "Identified by father Damasena (damasenaputrasa).",
-            "Name Yasodamasa with title Mahaksatrapasa."
-        ]
-    },
-    "vijayasena": {
-        "era": "Vijayasena",
-        "dynasty": "Western Kshatrapas (c. 238–250 CE)",
-        "script": "Brahmi",
-        "transliteration": "Rājño Mahākṣatrapasa Vijayasena",
-        "translation": "Great Satrap Vijayasena",
-        "description": "Son of Damasena; celebrated 12-year reign marked by plentiful high-grade silver drammas.",
-        "father": "Damasena",
-        "legend": "rajnomahaksatrapasadamasenaputrasarajnomahaksatrapasavijayasenasa",
-        "rules": [
-            "Identified by father Damasena (damasenaputrasa).",
-            "Name Vijayasenasa with title Mahaksatrapasa."
-        ]
-    },
-    "damajadasri_iii": {
-        "era": "Damajadasri III",
-        "dynasty": "Western Kshatrapas (c. 250–255 CE)",
-        "script": "Brahmi",
-        "transliteration": "Rājño Mahākṣatrapasa Dāmajadaśrī",
-        "translation": "Great Satrap Damajadasri III",
-        "description": "Fourth and final son of Damasena to rule as Mahaksatrapa.",
-        "father": "Damasena",
-        "legend": "rajnomahaksatrapasadamasenaputrasarajnomahaksatrapasadamajadasriyasa",
-        "rules": [
-            "Identified by father Damasena (damasenaputrasa).",
-            "Title Mahaksatrapasa."
+            "Identified by the phrase \"Rudrasihaputrasa\" (son of Rudrasimha I).",
+            "The king's name appears as \"Rudrasenasa\" with title \"Rajno Mahaksatrapasa\".",
+            "Sequence contains unique consonant conjuncts for \"dra\" (𑀤𑁆𑀭) and \"sa\" (𑀲)."
         ]
     },
     "rudrasena_ii": {
         "era": "Rudrasena II",
         "dynasty": "Western Kshatrapas (c. 255–278 CE)",
         "script": "Brahmi",
-        "transliteration": "Rājño Mahākṣatrapasa Rudrasena",
+        "transliteration": "Mahākṣatrapa Rudrasena",
         "translation": "Great Satrap Rudrasena II",
-        "description": "Son of Viradaman; long and prosperous reign, father of three subsequent rulers.",
+        "description": "Silver dramma of Rudrasena II with Kshatrapa titles in Brahmi script.",
         "father": "Viradaman",
         "legend": "rajnoksatrapasaviradamaputrasarajnomahaksatrapasarudrasenasa",
         "rules": [
-            "Identified by father Viradaman (viradamaputrasa).",
-            "Name Rudrasenasa with title Mahaksatrapasa."
-        ]
-    },
-    "visvasimha": {
-        "era": "Visvasimha",
-        "dynasty": "Western Kshatrapas (c. 278–282 CE)",
-        "script": "Brahmi",
-        "transliteration": "Rājño Kṣatrapasa Viśvasiṁha",
-        "translation": "Satrap Visvasimha",
-        "description": "Eldest son of Rudrasena II; ruled as Ksatrapa and briefly as Mahaksatrapa.",
-        "father": "Rudrasena II",
-        "legend": "rajnomahaksatrapasarudrasenaputrasarajnoksatrapasavisvasihasa",
-        "rules": [
-            "Identified by father Rudrasena II (rudrasenaputrasa).",
-            "Name Visvasihasa with title Ksatrapasa."
-        ]
-    },
-    "bhartrdaman": {
-        "era": "Bhartrdaman",
-        "dynasty": "Western Kshatrapas (c. 278–295 CE)",
-        "script": "Brahmi",
-        "transliteration": "Rājño Mahākṣatrapasa Bhartṛdāman",
-        "translation": "Great Satrap Bhartrdaman",
-        "description": "Second son of Rudrasena II; prolonged stable reign with prolific silver drammas.",
-        "father": "Rudrasena II",
-        "legend": "rajnomahaksatrapasarudrasenaputrasarajnomahaksatrapasabhartrdamasa",
-        "rules": [
-            "Identified by father Rudrasena II (rudrasenaputrasa).",
-            "Name Bhartrdamasa with titles Ksatrapasa and Mahaksatrapasa."
-        ]
-    },
-    "visvasena": {
-        "era": "Visvasena",
-        "dynasty": "Western Kshatrapas (c. 293–304 CE)",
-        "script": "Brahmi",
-        "transliteration": "Rājño Kṣatrapasa Viśvasena",
-        "translation": "Satrap Visvasena",
-        "description": "Third son of Rudrasena II; ruled strictly as Ksatrapa until Saka 226.",
-        "father": "Rudrasena II",
-        "legend": "rajnomahaksatrapasarudrasenaputrasarajnoksatrapasavisvasenasa",
-        "rules": [
-            "Identified by father Rudrasena II (rudrasenaputrasa).",
-            "Name Visvasenasa with title Ksatrapasa."
-        ]
-    },
-    "rudrasimha_ii": {
-        "era": "Rudrasimha II",
-        "dynasty": "Western Kshatrapas (c. 305–317 CE)",
-        "script": "Brahmi",
-        "transliteration": "Rājño Kṣatrapasa Svāmi Rudrasiṁha",
-        "translation": "Satrap Rudrasimha II",
-        "description": "Began the collateral line; father held title Swami Jivadaman without royal titles.",
-        "father": "Jivadaman",
-        "legend": "svamijivadamaputrasarajnoksatrapasarudrasihasa",
-        "rules": [
-            "Identified by father Swami Jivadaman (svamijivadamaputrasa).",
-            "Coins introduce the honorific Svami (Lord) prefix."
-        ]
-    },
-    "yasodaman_ii": {
-        "era": "Yasodaman II",
-        "dynasty": "Western Kshatrapas (c. 317–332 CE)",
-        "script": "Brahmi",
-        "transliteration": "Rājño Kṣatrapasa Svāmi Yaśodāman",
-        "translation": "Satrap Yasodaman II",
-        "description": "Son of Rudrasimha II; silver drammas show both father and son holding Svami honorifics.",
-        "father": "Rudrasimha II",
-        "legend": "rajnoksatrapasasvamirudrasihaputrasarajnoksatrapasasvamiyasodamasa",
-        "rules": [
-            "Identified by father Rudrasimha II (svamirudrasihaputrasa).",
-            "Name Yasodamasa with title Ksatrapasa."
+            "Identified by the phrase \"Viradamaputrasa\" (son of Viradaman).",
+            "The king's name appears as \"Rudrasenasa\" with title \"Rajno Mahaksatrapasa\".",
+            "Matches the sequence sequence with Levenshtein similarity above 50%."
         ]
     },
     "rudrasena_iii": {
         "era": "Rudrasena III",
         "dynasty": "Western Kshatrapas (c. 348–380 CE)",
         "script": "Brahmi",
-        "transliteration": "Rājño Mahākṣatrapasa Svāmi Rudrasena",
+        "transliteration": "Svāmi Mahākṣatrapa Rudrasena",
         "translation": "Lord Great Satrap Rudrasena III",
-        "description": "Restored Mahaksatrapa authority with abundant silver drammas and lead square issues.",
-        "father": "Swami Rudradaman",
+        "description": "Late Western Kshatrapa coinage with elaborate Brahmi inscriptions.",
+        "father": "Rudradaman II",
         "legend": "rajnomahaksatrapasasvamirudradamaputrasarajnomahaksatrapasasvamirudrasenasa",
         "rules": [
-            "Identified by father Swami Rudradaman (svamirudradamaputrasa).",
-            "Uses the prestigious title Svami (Lord) on both ruler and father."
-        ]
-    },
-    "simhasena": {
-        "era": "Swami Simhasena",
-        "dynasty": "Western Kshatrapas (c. 382 CE)",
-        "script": "Brahmi",
-        "transliteration": "Rājño Mahākṣatrapasa Svāmi Siṁhasena",
-        "translation": "Lord Great Satrap Simhasena",
-        "description": "Succeeded Swami Rudrasena III; coins record his lineage as sister's son / son.",
-        "father": "Swami Rudrasena",
-        "legend": "rajnomahaksatrapasasvamirudrasenaputrasarajnomahaksatrapasasvamisihasenasa",
-        "rules": [
-            "Identified by father Swami Rudrasena (svamirudrasenaputrasa).",
-            "Title Svami Mahaksatrapa."
+            "Identified by the phrase \"Svamirudradamaputrasa\" (son of Lord Rudradaman II).",
+            "Uses the prestigious title \"Svami\" (Lord) in front of the ruler's name.",
+            "Matches sequence with \"svami\" (𑀲𑁆𑀯𑀸𑀫𑀺) character patterns."
         ]
     },
     "rudrasena_iv": {
         "era": "Rudrasena IV",
         "dynasty": "Western Kshatrapas (c. 382–388 CE)",
         "script": "Brahmi",
-        "transliteration": "Rājño Mahākṣatrapasa Svāmi Rudrasena",
-        "translation": "Lord Great Satrap Rudrasena IV",
-        "description": "Son of Swami Simhasena; late dynasty coinage with stylized Brahmi characters.",
-        "father": "Swami Simhasena",
+        "transliteration": "Mahākṣatrapa Rudrasena",
+        "translation": "Great Satrap Rudrasena IV",
+        "description": "Last phase Western Kshatrapa coin before Gupta conquest.",
+        "father": "Simhasena",
         "legend": "rajnomahaksatrapasasvamisihasenaputrasarajnomahaksatrapasasvamirudrasenasa",
         "rules": [
-            "Identified by father Swami Simhasena (svamisihasenaputrasa).",
+            "Identified by the phrase \"Svamisihasenaputrasa\" (son of Lord Simhasena).",
             "Late dynasty coinage showing slightly stylized Brahmi script characters."
         ]
     },
-    "rudrasimha_iii": {
-        "era": "Rudrasimha III",
-        "dynasty": "Western Kshatrapas (c. 388–395 CE)",
-        "script": "Brahmi",
-        "transliteration": "Rājño Mahākṣatrapasa Svāmi Rudrasiṁha",
-        "translation": "Lord Great Satrap Rudrasimha III",
-        "description": "Final recorded Mahaksatrapa ruler before Chandragupta II's Gupta conquest of Malwa/Gujarat.",
-        "father": "Swami Satyasimha",
-        "legend": "rajnomahaksatrapasasvamisatyasihaputrasarajnomahaksatrapasasvamirudrasihasa",
-        "rules": [
-            "Identified by father Swami Satyasimha (svamisatyasihaputrasa).",
-            "Final Kshatrapa coinage before absorption into the Gupta empire."
-        ]
-    },
-    "horumurnata": {
-        "era": "Swami Horumurnata",
-        "dynasty": "Western Kshatrapas / Regional (c. 4th century CE)",
-        "script": "Brahmi",
-        "transliteration": "Rājño Kṣatrapasa Svāmi Horumūrṇata",
-        "translation": "Lord Satrap Horumurnata",
-        "description": "Regional Kshatrapa ruler in Saurashtra/Sindh issuing rare potin and lead coins.",
-        "father": "Unknown",
-        "legend": "svamihorumurnatasa",
-        "rules": [
-            "Father Unknown.",
-            "Distinctive non-Sanskritic name Horumurnata with Svami title."
-        ]
-    },
-    # ── Additional Reference & Legacy Classes ──
-    "nahapana": {
-        "era": "Nahapana",
-        "dynasty": "Western Kshatrapas (c. 105–125 CE)",
+    # Chastana lineage
+    "chastana": {
+        "era": "Chastana",
+        "dynasty": "Western Kshatrapas (c. 78–130 CE)",
         "script": "Brahmi & Kharoshthi",
-        "transliteration": "Kṣaharāta Nahapāna",
-        "translation": "Kshaharata Nahapana",
-        "description": "Early bilingual silver coinage; predecessor dynasty to Kardamakas.",
-        "father": "Bhumaka",
-        "legend": "rajnoksaharatasanahapanasa",
+        "transliteration": "Mahākṣatrapa Chaṣṭana",
+        "translation": "Great Satrap Chastana",
+        "description": "Founder of the Kardamaka dynasty; bilingual silver coinage.",
+        "father": "Ysamotika",
+        "legend": "rajnoksatrapasaysamotikaputrasachastanasa",
         "rules": [
-            "Uses the distinct dynasty title Ksaharatasa (Kshaharata).",
-            "Obverse features Greek legend; reverse features bilingual Brahmi and Kharoshthi script."
+            "Identified by the father \"Ysamotika\" (ysamotikaputrasa).",
+            "Bilingual reverse/obverse legend using Brahmi and Kharoshthi/Greek scripts."
+        ]
+    },
+    "jayadaman": {
+        "era": "Jayadaman",
+        "dynasty": "Western Kshatrapas (c. 170–178 CE)",
+        "script": "Brahmi",
+        "transliteration": "Kṣatrapa Jayadāman",
+        "translation": "Satrap Jayadaman",
+        "description": "Short-reign Kshatrapa whose coins are comparatively rare.",
+        "father": "Chastana",
+        "legend": "rajnoksatrapasasvamichastanaputrasajayadamasa",
+        "rules": [
+            "Identified by the father \"Chastana\" (chastanaputrasa).",
+            "Ruler holds the title \"Ksatrapa\" (Satrap) instead of \"Mahaksatrapa\"."
+        ]
+    },
+    "damajadasri_i": {
+        "era": "Damajadasri I",
+        "dynasty": "Western Kshatrapas (c. 178–197 CE)",
+        "script": "Brahmi",
+        "transliteration": "Mahākṣatrapa Dāmājadasri",
+        "translation": "Great Satrap Damajadasri I",
+        "description": "Prolific reign; standardised the dramma coinage format.",
+        "father": "Rudradaman I",
+        "legend": "rajnomahaksatrapasarudradamaputrasarajnomahaksatrapasadamajadasriyasa",
+        "rules": [
+            "Identified by the father \"Rudradaman I\" (rudradamaputrasa).",
+            "Contains character sequence \"damajadasriyasa\" at the end of the legend."
+        ]
+    },
+    "damajadasri_ii": {
+        "era": "Damajadasri II",
+        "dynasty": "Western Kshatrapas (c. 232–235 CE)",
+        "script": "Brahmi",
+        "transliteration": "Mahākṣatrapa Dāmājadasri",
+        "translation": "Great Satrap Damajadasri II",
+        "description": "Brief interlude ruler between Rudrasena lines.",
+        "father": "Rudrasena I",
+        "legend": "rajnomahaksatrapasarudrasenaputrasarajnoksatrapasadamajadasriyasa",
+        "rules": [
+            "Identified by the father \"Rudrasena I\" (rudrasenaputrasa).",
+            "Ruler's title on legend is \"Ksatrapa\" while the father's is \"Mahaksatrapa\"."
+        ]
+    },
+    "viradaman": {
+        "era": "Viradaman",
+        "dynasty": "Western Kshatrapas (c. 234–238 CE)",
+        "script": "Brahmi",
+        "transliteration": "Mahākṣatrapa Vīradāman",
+        "translation": "Great Satrap Viradaman",
+        "description": "Coins show degraded portrait style typical of mid-3rd century.",
+        "father": "Damasena",
+        "legend": "rajnomahaksatrapasadamasenaputrasarajnoksatrapasaviradamasa",
+        "rules": [
+            "Identified by the father \"Damasena\" (damasenaputrasa).",
+            "Ruler's name is \"Viradamasa\" with title \"Ksatrapasa\"."
         ]
     },
     "visvavarman": {
@@ -555,7 +206,35 @@ ERA_CONTEXT: dict[str, dict] = {
         "father": "Visvasena",
         "legend": "rajnomahaksatrapasavisvasenaputrasarajnomahaksatrapasavisvavarmasa",
         "rules": [
-            "Identified by father Visvasena (visvasenaputrasa)."
+            "Identified by the father \"Visvasena\" (visvasenaputrasa)."
+        ]
+    },
+    "yasodaman_i": {
+        "era": "Yasodaman I",
+        "dynasty": "Western Kshatrapas (c. 222–225 CE)",
+        "script": "Brahmi",
+        "transliteration": "Mahākṣatrapa Yaśodāman",
+        "translation": "Great Satrap Yasodaman I",
+        "description": "Short-reign; notable for high silver purity coinage.",
+        "father": "Damasena",
+        "legend": "rajnomahaksatrapasadamasenaputrasarajnomahaksatrapasayasodamasa",
+        "rules": [
+            "Identified by the father \"Damasena\" (damasenaputrasa).",
+            "Ruler's name is \"Yasodamasa\" with title \"Mahaksatrapasa\"."
+        ]
+    },
+    "yasodaman_ii": {
+        "era": "Yasodaman II",
+        "dynasty": "Western Kshatrapas (c. 278–295 CE)",
+        "script": "Brahmi",
+        "transliteration": "Svāmi Yaśodāman",
+        "translation": "Lord Yasodaman II",
+        "description": "Coins show Brahmi legend with royal epithets.",
+        "father": "Rudrasimha II",
+        "legend": "rajnoksatrapasasvamirudrasihaputrasarajnoksatrapasasvamiyasodamasa",
+        "rules": [
+            "Identified by the father \"Rudrasimha II\" (svamirudrasihaputrasa).",
+            "Uses title \"Svami\" (Lord) for both father and son."
         ]
     },
     "abhyadaman": {
@@ -568,7 +247,49 @@ ERA_CONTEXT: dict[str, dict] = {
         "father": "Unknown",
         "legend": "rajnomahaksatrapasaabhyadamasa",
         "rules": [
-            "Shorter legend sequence matching abhyadamasa directly."
+            "Shorter legend sequence matching \"abhyadamasa\" directly."
+        ]
+    },
+    "isvaradatta": {
+        "era": "Isvaradatta",
+        "dynasty": "Abhira / anti-Kshatrapa (c. 235 CE)",
+        "script": "Brahmi",
+        "transliteration": "Mahākṣatrapa Īśvaradatta",
+        "translation": "Great Satrap Isvaradatta",
+        "description": "Usurper who briefly controlled western India; very rare coins.",
+        "father": "Unknown",
+        "legend": "rajnomahaksatrapasaisvaradattasa",
+        "rules": [
+            "Unique non-dynastic legend without the standard \"putrasa\" (son of) formula.",
+            "Explicitly names \"Isvaradattasa\" with regnal year on the obverse."
+        ]
+    },
+    "nahapana": {
+        "era": "Nahapana",
+        "dynasty": "Western Kshatrapas (c. 105–125 CE)",
+        "script": "Brahmi & Kharoshthi",
+        "transliteration": "Kṣaharāta Nahapāna",
+        "translation": "Kshaharata Nahapana",
+        "description": "Early bilingual silver coinage; predecessor dynasty to Kardamakas.",
+        "father": "Bhumaka",
+        "legend": "rajnoksaharatasanahapanasa",
+        "rules": [
+            "Uses the distinct dynasty title \"Ksaharatasa\" (Kshaharata).",
+            "Obverse features Greek legend; reverse features bilingual Brahmi and Kharoshthi script."
+        ]
+    },
+    "rudradaman_i": {
+        "era": "Rudradaman I",
+        "dynasty": "Western Kshatrapas (c. 130–150 CE)",
+        "script": "Brahmi",
+        "transliteration": "Mahākṣatrapa Rudradāman",
+        "translation": "Great Satrap Rudradaman I",
+        "description": "Most celebrated Kshatrapa ruler; issued famous Junagadh inscription.",
+        "father": "Jayadaman",
+        "legend": "rajnoksatrapasajayadamaputrasarajnomahaksatrapasarudradamasa",
+        "rules": [
+            "Identified by the father \"Jayadaman\" (jayadamaputrasa).",
+            "Ruler's name is \"Rudradamasa\" with title \"Mahaksatrapasa\"."
         ]
     },
     "brahmi_kshatrap": {
@@ -626,86 +347,35 @@ BRAHMI_CHAR_MAP: dict[str, dict[str, str]] = {
 # ─────────────────────────────────────────────────────────────────────────────
 
 KNOWN_LEGENDS: dict[str, dict[str, str]] = {
-    # ── Rulers and Fathers in Chronological Order (Table 1) ──
-    "chastana": {
-        "legend": "rajnoksatrapasazamotikaputrasachastanasa",
-        "father": "Zamotika",
-        "king": "Chastana"
+    "rudrasena_i": {
+        "legend": "rajnomahaksatrapasarudrasihaputrasarajnomahaksatrapasarudrasenasa",
+        "father": "Rudrasimha I",
+        "king": "Rudrasena I"
     },
-    "damazada_i": {
-        "legend": "rajnoksatrapasazamotikaputrasadamazadasa",
-        "father": "Zamotika",
-        "king": "Damazada I"
+    "rudrasena_ii": {
+        "legend": "rajnoksatrapasaviradamaputrasarajnomahaksatrapasarudrasenasa",
+        "father": "Viradaman",
+        "king": "Rudrasena II"
     },
-    "jayadaman": {
-        "legend": "rajnoksatrapasajayadamanasa",
-        "father": "Unknown",
-        "king": "Jayadaman"
+    "rudrasena_iii": {
+        "legend": "rajnomahaksatrapasasvamirudradamaputrasarajnomahaksatrapasasvamirudrasenasa",
+        "father": "Rudradaman II",
+        "king": "Rudrasena III"
+    },
+    "rudrasena_iv": {
+        "legend": "rajnomahaksatrapasasvamisihasenaputrasarajnomahaksatrapasasvamirudrasenasa",
+        "father": "Simhasena",
+        "king": "Rudrasena IV"
     },
     "rudradaman_i": {
         "legend": "rajnoksatrapasajayadamaputrasarajnomahaksatrapasarudradamasa",
         "father": "Jayadaman",
         "king": "Rudradaman I"
     },
-    "rudradaman": {
-        "legend": "rajnoksatrapasajayadamaputrasarajnomahaksatrapasarudradamasa",
-        "father": "Jayadaman",
-        "king": "Rudradaman I"
-    },
-    "damazada_ii": {
-        "legend": "rajnomahaksatrapasarudradamaputrasarajnoksatrapasadamazadasa",
-        "father": "Rudradaman",
-        "king": "Damazada II"
-    },
     "damajadasri_i": {
         "legend": "rajnomahaksatrapasarudradamaputrasarajnomahaksatrapasadamajadasriyasa",
-        "father": "Rudradaman",
+        "father": "Rudradaman I",
         "king": "Damajadasri I"
-    },
-    "rudrasimha_i": {
-        "legend": "rajnomahaksatrapasarudradamaputrasarajnomahaksatrapasarudrasihasa",
-        "father": "Rudradaman",
-        "king": "Rudrasimha I"
-    },
-    "jivadaman": {
-        "legend": "rajnomahaksatrapasadamazadasaputrasarajnomahaksatrapasajivadamasa",
-        "father": "Damazada II",
-        "king": "Jivadaman"
-    },
-    "satyadaman": {
-        "legend": "rajnomahaksatrapasadamazadasaputrasarajnoksatrapasasatyadamasa",
-        "father": "Damazada II",
-        "king": "Satyadaman"
-    },
-    "rudrasena_i": {
-        "legend": "rajnomahaksatrapasarudrasihaputrasarajnomahaksatrapasarudrasenasa",
-        "father": "Rudrasimha I",
-        "king": "Rudrasena I"
-    },
-    "isvaradatta": {
-        "legend": "rajnomahaksatrapasarudrasihaputrasarajnoksatrapasaisvaradevassa",
-        "father": "Rudrasimha I",
-        "king": "Isvaradatta / Isvaradeva"
-    },
-    "isvaradeva": {
-        "legend": "rajnomahaksatrapasarudrasihaputrasarajnoksatrapasaisvaradevassa",
-        "father": "Rudrasimha I",
-        "king": "Isvaradeva"
-    },
-    "prithvisena": {
-        "legend": "rajnomahaksatrapasarudrasenaputrasarajnoksatrapasaprithvisenasa",
-        "father": "Rudrasena I",
-        "king": "Prithvisena"
-    },
-    "damasena": {
-        "legend": "rajnomahaksatrapasarudrasihaputrasarajnomahaksatrapasadamasenasa",
-        "father": "Rudrasimha I",
-        "king": "Damasena"
-    },
-    "samghadaman": {
-        "legend": "rajnomahaksatrapasarudrasihaputrasarajnomahaksatrapasasamghadamasa",
-        "father": "Rudrasimha I",
-        "king": "Samghadaman"
     },
     "damajadasri_ii": {
         "legend": "rajnomahaksatrapasarudrasenaputrasarajnoksatrapasadamajadasriyasa",
@@ -722,84 +392,38 @@ KNOWN_LEGENDS: dict[str, dict[str, str]] = {
         "father": "Damasena",
         "king": "Yasodaman I"
     },
-    "vijayasena": {
-        "legend": "rajnomahaksatrapasadamasenaputrasarajnomahaksatrapasavijayasenasa",
-        "father": "Damasena",
-        "king": "Vijayasena"
-    },
-    "damajadasri_iii": {
-        "legend": "rajnomahaksatrapasadamasenaputrasarajnomahaksatrapasadamajadasriyasa",
-        "father": "Damasena",
-        "king": "Damajadasri III"
-    },
-    "rudrasena_ii": {
-        "legend": "rajnoksatrapasaviradamaputrasarajnomahaksatrapasarudrasenasa",
-        "father": "Viradaman",
-        "king": "Rudrasena II"
-    },
-    "visvasimha": {
-        "legend": "rajnomahaksatrapasarudrasenaputrasarajnoksatrapasavisvasihasa",
-        "father": "Rudrasena II",
-        "king": "Visvasimha"
-    },
-    "bhartrdaman": {
-        "legend": "rajnomahaksatrapasarudrasenaputrasarajnomahaksatrapasabhartrdamasa",
-        "father": "Rudrasena II",
-        "king": "Bhartrdaman"
-    },
-    "visvasena": {
-        "legend": "rajnomahaksatrapasarudrasenaputrasarajnoksatrapasavisvasenasa",
-        "father": "Rudrasena II",
-        "king": "Visvasena"
-    },
-    "rudrasimha_ii": {
-        "legend": "svamijivadamaputrasarajnoksatrapasarudrasihasa",
-        "father": "Jivadaman",
-        "king": "Rudrasimha II"
-    },
     "yasodaman_ii": {
         "legend": "rajnoksatrapasasvamirudrasihaputrasarajnoksatrapasasvamiyasodamasa",
         "father": "Rudrasimha II",
         "king": "Yasodaman II"
     },
-    "rudrasena_iii": {
-        "legend": "rajnomahaksatrapasasvamirudradamaputrasarajnomahaksatrapasasvamirudrasenasa",
-        "father": "Swami Rudradaman",
-        "king": "Rudrasena III"
+    "jayadaman": {
+        "legend": "rajnoksatrapasasvamichastanaputrasajayadamasa",
+        "father": "Chastana",
+        "king": "Jayadaman"
     },
-    "simhasena": {
-        "legend": "rajnomahaksatrapasasvamirudrasenaputrasarajnomahaksatrapasasvamisihasenasa",
-        "father": "Swami Rudrasena",
-        "king": "Swami Simhasena"
+    "chastana": {
+        "legend": "rajnoksatrapasaysamotikaputrasachastanasa",
+        "father": "Ysamotika",
+        "king": "Chastana"
     },
-    "rudrasena_iv": {
-        "legend": "rajnomahaksatrapasasvamisihasenaputrasarajnomahaksatrapasasvamirudrasenasa",
-        "father": "Swami Simhasena",
-        "king": "Rudrasena IV"
-    },
-    "rudrasimha_iii": {
-        "legend": "rajnomahaksatrapasasvamisatyasihaputrasarajnomahaksatrapasasvamirudrasihasa",
-        "father": "Swami Satyasimha",
-        "king": "Rudrasimha III"
-    },
-    "horumurnata": {
-        "legend": "svamihorumurnatasa",
-        "father": "Unknown",
-        "king": "Swami Horumurnata"
-    },
-    # ── Additional Reference Classes ──
     "nahapana": {
         "legend": "rajnoksaharatasanahapanasa",
         "father": "Bhumaka",
         "king": "Nahapana"
     },
+    "isvaradatta": {
+        "legend": "rajnomahaksatrapasaisvaradattasa",
+        "father": "Unknown",
+        "king": "Isvaradatta"
+    },
     "visvavarman": {
-        "legend": "rajnomahaksatrapasavisvasenaputrasarajnomahaksatrapasavisvavarmasa",
+        "legend": "rajnomahaksatrapasavisvasenaputrasarajnomahaksatrapasavisvavarmasa", # Approximation for Visvavarman
         "father": "Visvasena",
         "king": "Visvavarman"
     },
     "abhyadaman": {
-        "legend": "rajnomahaksatrapasaabhyadamasa",
+        "legend": "rajnomahaksatrapasaabhyadamasa", # Approximation
         "father": "Unknown",
         "king": "Abhyadaman"
     }
@@ -816,14 +440,8 @@ class _ModelHolder:
     def __init__(self) -> None:
         self._coin_model: Any | None = None
         self._char_model: Any | None = None
-        self._classifier_model: Any | None = None
-        self._paired_models: Any | None = None
         self._coin_names: dict[int, str] = {}
         self._char_names: dict[int, str] = {}
-        self._classifier_classes: list[str] = []
-        self._paired_classes: list[str] = []
-        self._paired_cache: Any | None = None
-        self._paired_device: Any | None = None
 
     def _load_coin_model(self) -> Any:
         if self._coin_model is None:
@@ -851,83 +469,6 @@ class _ModelHolder:
                 raise
         return self._char_model
 
-    def _load_classifier_model(self) -> Any:
-        if self._classifier_model is None:
-            try:
-                import torch
-                from app.services.coin_classifier import ImprovCoinNet
-                logger.info("Loading ArcFace coin classifier from %s", COIN_CLASSIFIER_PATH)
-                if not COIN_CLASSIFIER_PATH.exists():
-                    raise FileNotFoundError(f"Classification model weights not found at: {COIN_CLASSIFIER_PATH}")
-
-                device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-                checkpoint = torch.load(COIN_CLASSIFIER_PATH, map_location=device, weights_only=False)
-                self._classifier_classes = checkpoint.get("class_names", [])
-                arch_cfg = checkpoint.get("arch_config", {})
-
-                model = ImprovCoinNet(
-                    num_classes=len(self._classifier_classes),
-                    backbone=arch_cfg.get("backbone", "resnet18"),
-                    embedding_dim=arch_cfg.get("embedding_dim", 512),
-                    s=arch_cfg.get("scale", 30.0),
-                    m=arch_cfg.get("margin", 0.50),
-                    pretrained=False,
-                ).to(device)
-
-                model.load_state_dict(checkpoint["model_state_dict"])
-                model.eval()
-                self._classifier_model = model
-                self._classifier_device = device
-                logger.info("Coin classifier loaded. Total classes: %d (Device: %s)", len(self._classifier_classes), device)
-            except Exception as exc:
-                logger.error("Failed to load classifier model: %s", exc)
-                raise
-        return self._classifier_model
-
-    def _load_paired_models(self) -> Any:
-        if self._paired_models is None:
-            try:
-                import json
-                import torch
-                from app.services.coin_classifier_paired import load_paired_models
-                logger.info("Loading Method 1 Paired models from %s", PAIRED_COIN_DIR)
-
-                summary_file = PAIRED_COIN_DIR / "final_summary.json"
-                if not summary_file.exists():
-                    summary_file = PAIRED_COIN_DIR / "results" / "final_summary.json"
-                if not summary_file.exists():
-                    raise FileNotFoundError(f"final_summary.json not found in {PAIRED_COIN_DIR}")
-
-                with open(summary_file, "r", encoding="utf-8") as f:
-                    summary = json.load(f)
-                self._paired_classes = [x["king"] for x in summary.get("per_king_stats", [])]
-
-                device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-                if (PAIRED_COIN_DIR / "joint_siamese_224.pth").exists() or (PAIRED_COIN_DIR / "joint_siamese_224.pth.part1").exists() or (PAIRED_COIN_DIR / "legend_model.pth").exists():
-                    ckpt_dir = PAIRED_COIN_DIR
-                else:
-                    ckpt_dir = PAIRED_COIN_DIR / "checkpoints"
-                self._paired_models = load_paired_models(ckpt_dir, len(self._paired_classes), device)
-
-                cache_file = PAIRED_COIN_DIR / "cached_embeddings.pt"
-                if not cache_file.exists():
-                    cache_file = PAIRED_COIN_DIR / "results" / "cached_embeddings.pt"
-
-                if cache_file.exists():
-                    loaded_cache = torch.load(cache_file, map_location="cpu", weights_only=False)
-                    if "train_embs_fused" in loaded_cache and isinstance(loaded_cache["train_embs_fused"], torch.Tensor):
-                        loaded_cache["train_embs_fused"] = loaded_cache["train_embs_fused"].to(device)
-                    self._paired_cache = loaded_cache
-                else:
-                    self._paired_cache = None
-
-                self._paired_device = device
-                logger.info("Method 1 Paired models loaded successfully. Total classes: %d (Device: %s)", len(self._paired_classes), device)
-            except Exception as exc:
-                logger.error("Failed to load Method 1 paired models: %s", exc)
-                raise
-        return self._paired_models
-
     @property
     def coin_model(self) -> Any:
         return self._load_coin_model()
@@ -935,39 +476,6 @@ class _ModelHolder:
     @property
     def char_model(self) -> Any:
         return self._load_char_model()
-
-    @property
-    def classifier_model(self) -> Any:
-        return self._load_classifier_model()
-
-    @property
-    def classifier_classes(self) -> list[str]:
-        self._load_classifier_model()
-        return self._classifier_classes
-
-    @property
-    def classifier_device(self) -> Any:
-        self._load_classifier_model()
-        return self._classifier_device
-
-    @property
-    def paired_models(self) -> Any:
-        return self._load_paired_models()
-
-    @property
-    def paired_classes(self) -> list[str]:
-        self._load_paired_models()
-        return self._paired_classes
-
-    @property
-    def paired_cache(self) -> Any:
-        self._load_paired_models()
-        return self._paired_cache
-
-    @property
-    def paired_device(self) -> Any:
-        self._load_paired_models()
-        return self._paired_device
 
     @property
     def coin_names(self) -> dict[int, str]:
@@ -1603,183 +1111,3 @@ def infer_character(image_path: str) -> dict:
             "predicted_father_from_text": "Unknown",
             "predicted_legend": ""
         }
-
-
-def infer_coin_classification(image_path: str, use_tta: bool = True) -> dict:
-    """
-    Run ArcFace deep metric learning classification on a Western Kshatrapa coin.
-    Identifies the specific ruler among 29 kings using ResNet-18 + ArcFace
-    with 8-angle Test-Time Augmentation (TTA).
-
-    Returns:
-    {
-      "scan_mode": "classification",
-      "predicted_king": str,
-      "confidence": float,
-      "top_predictions": [{"king": str, "confidence": float, "rank": int}, ...],
-      "dynasty_context": str,
-      "script": str,
-      "transliteration": str,
-      "translation": str,
-      "father": str
-    }
-    """
-    try:
-        import torch
-        import torch.nn.functional as F
-        import numpy as np
-        from app.services.coin_classifier import enhance_coin_image
-
-        model = _holder.classifier_model
-        class_names = _holder.classifier_classes
-        device = _holder.classifier_device
-
-        bgr = cv2.imread(image_path)
-        if bgr is None:
-            raise ValueError(f"Failed to load image from: {image_path}")
-        rgb = cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
-
-        # 1. High-fidelity numismatic preprocessing (LAB CLAHE + unsharp masking)
-        enhanced = enhance_coin_image(rgb, target_size=224)
-
-        mean = np.array([0.485, 0.456, 0.406], dtype=np.float32)
-        std = np.array([0.229, 0.224, 0.225], dtype=np.float32)
-
-        if use_tta:
-            # 8-angle rotational TTA: (0, 45, 90, 135, 180, 225, 270, 315)
-            # Averages L2-normalized embeddings to cancel out local shadows and flan orientation bias
-            angles = [0, 45, 90, 135, 180, 225, 270, 315]
-            h, w = enhanced.shape[:2]
-            center = (w // 2, h // 2)
-            views = []
-            for ang in angles:
-                if ang == 0:
-                    rot = enhanced
-                else:
-                    M = cv2.getRotationMatrix2D(center, ang, 1.0)
-                    rot = cv2.warpAffine(enhanced, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REFLECT)
-                norm_v = (rot.astype(np.float32) / 255.0 - mean) / std
-                views.append(torch.tensor(norm_v, dtype=torch.float32).permute(2, 0, 1))
-
-            batch_tensor = torch.stack(views).to(device)
-            with torch.no_grad():
-                features = model.extract_features(batch_tensor)
-                avg_feat = F.normalize(features.mean(dim=0, keepdim=True), p=2, dim=1)
-                logits = model.arcface_head(avg_feat, label=None)
-                probs = F.softmax(logits, dim=-1).squeeze(0).cpu().numpy()
-            method_name = "arcface_resnet18_8angle_tta"
-        else:
-            norm_img = (enhanced.astype(np.float32) / 255.0 - mean) / std
-            tensor = torch.tensor(norm_img, dtype=torch.float32).permute(2, 0, 1).unsqueeze(0).to(device)
-            with torch.no_grad():
-                logits = model(tensor, label=None)
-                probs = F.softmax(logits, dim=-1).squeeze(0).cpu().numpy()
-            method_name = "arcface_resnet18_single_view"
-
-        sorted_indices = np.argsort(probs)[::-1]
-        best_idx = sorted_indices[0]
-        predicted_king = class_names[best_idx]
-        best_conf = float(probs[best_idx])
-
-        top5_preds = [
-            {
-                "king": class_names[idx],
-                "confidence": round(float(probs[idx]), 4),
-                "rank": r + 1,
-            }
-            for r, idx in enumerate(sorted_indices[:5])
-        ]
-
-        ctx = _get_era_context(predicted_king)
-
-        return {
-            "scan_mode": "classification",
-            "predicted_king": predicted_king,
-            "confidence": round(best_conf, 4),
-            "top_predictions": top5_preds,
-            "dynasty_context": ctx.get("dynasty", "Western Kshatrapas"),
-            "script": ctx.get("script", "Brahmi"),
-            "transliteration": ctx.get("transliteration", "—"),
-            "translation": ctx.get("translation", "—"),
-            "father": ctx.get("father", "Unknown"),
-        }
-
-    except Exception as exc:
-        logger.exception("Coin classification inference failed: %s", exc)
-        return {
-            "scan_mode": "classification",
-            "predicted_king": "Unknown",
-            "confidence": 0.0,
-            "top_predictions": [],
-            "dynasty_context": "Unidentified",
-            "script": "Brahmi",
-            "transliteration": "—",
-            "translation": "Coin classification inference failed",
-            "father": "Unknown",
-            "error": str(exc),
-        }
-
-
-def infer_paired_coins(obverse_path: str, reverse_path: str, use_genealogy: bool = True) -> dict:
-    """
-    Run Method 1 Two-Sided Classification on a Western Kshatrapa coin.
-    Takes both Obverse (Face/Portrait) and Reverse (Legend/Inscription) images.
-    Uses Multi-Scale Concentric Ring TTA + Joint Siamese 224+288 + Soft k-NN +
-    Genealogical Disambiguation Engine.
-    """
-    try:
-        from app.services.coin_classifier_paired import predict_paired_coins
-
-        models = _holder.paired_models
-        class_names = _holder.paired_classes
-        train_cache = _holder.paired_cache
-        device = _holder.paired_device
-
-        res = predict_paired_coins(
-            obverse_img_or_path=obverse_path,
-            reverse_img_or_path=reverse_path,
-            models_tuple=models,
-            class_names=class_names,
-            train_cache=train_cache,
-            device=device,
-            use_genealogy=use_genealogy,
-        )
-
-        predicted_king = res["predicted_king"]
-        ctx = _get_era_context(predicted_king)
-
-        return {
-            "scan_mode": "paired_classification",
-            "predicted_king": predicted_king,
-            "confidence": res["confidence"],
-            "top_predictions": res["top_predictions"],
-            "disambiguation_applied": res["disambiguation_applied"],
-            "disambiguation_note": res["disambiguation_note"],
-            "dynasty_context": ctx.get("dynasty", "Western Kshatrapas"),
-            "script": ctx.get("script", "Brahmi"),
-            "transliteration": ctx.get("transliteration", "—"),
-            "translation": ctx.get("translation", "—"),
-            "father": ctx.get("father", "Unknown"),
-            "description": ctx.get("description", ""),
-            "rules": ctx.get("rules", []),
-        }
-
-    except Exception as exc:
-        logger.exception("Paired coin inference failed: %s", exc)
-        return {
-            "scan_mode": "paired_classification",
-            "predicted_king": "Unknown",
-            "confidence": 0.0,
-            "top_predictions": [],
-            "disambiguation_applied": False,
-            "disambiguation_note": "Inference error",
-            "dynasty_context": "Unidentified",
-            "script": "Brahmi",
-            "transliteration": "—",
-            "translation": "Paired coin inference failed",
-            "father": "Unknown",
-            "error": str(exc),
-        }
-
-
-

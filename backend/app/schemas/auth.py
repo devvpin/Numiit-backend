@@ -20,7 +20,6 @@ class RegisterRequest(BaseModel):
     email: EmailStr
     password: str
 
-
 class SSOLoginRequest(BaseModel):
     id_token: str
 

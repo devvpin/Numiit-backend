@@ -3,7 +3,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user_optional, get_current_admin_user
+from app.api.deps import get_current_user_optional,get_current_admin_user
 from app.db.session import get_db
 from app.models.user import User
 from app.models.scan import Scan
@@ -114,7 +114,6 @@ def list_scans(
     scans = query_db.all()
     return [map_scan_to_schema(s) for s in scans]
 
-
 @router.get("/all", response_model=list[ScanRead])
 def list_all_scans_admin(
     db: Session = Depends(get_db),
@@ -139,6 +138,8 @@ def get_scan(
             detail="Scan not found",
         )
 
+    # # Authorization check
+    # if scan.user_email != email and scan.id > 3:
     # Authorization check: Owner or Admin
     is_admin = current_user is not None and current_user.role == "admin"
     if scan.user_email != email and scan.id > 3 and not is_admin:
@@ -166,6 +167,8 @@ def update_scan(
             detail="Scan not found",
         )
 
+    # # Authorization check
+    # if scan.user_email != email:
     # Authorization check: Owner or Admin
     is_admin = current_user is not None and current_user.role == "admin"
     if scan.user_email != email and not is_admin:
@@ -203,7 +206,9 @@ def delete_scan(
             detail="Scan not found",
         )
 
-    # Authorization check: Owner or Admin
+    # # Authorization check
+    # if scan.user_email != email:
+     # Authorization check: Owner or Admin
     is_admin = current_user is not None and current_user.role == "admin"
     if scan.user_email != email and not is_admin:
         raise HTTPException(

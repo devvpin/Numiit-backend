@@ -10,9 +10,9 @@ from app.db.session import engine
 from app.models import User, Scan
 
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[1]
 FRONTEND_WEB_BUILD = REPO_ROOT / "frontend" / "build" / "web"
-UPLOADS_DIR = Path(__file__).resolve().parents[1] / "uploads"
+UPLOADS_DIR = REPO_ROOT / "uploads"
 
 
 def ensure_database_exists() -> None:
@@ -135,26 +135,10 @@ def create_app() -> FastAPI:
     patch_users_table_columns()
     seed_default_users()
 
-    # Warm up models in background so inference is instant
-    import threading
-    def _warmup_models():
-        try:
-            from app.services.ml_inference import _holder
-            _holder._load_paired_models()
-            print("Two-sided AI models warmed up and ready.")
-        except Exception as err:
-            print(f"Model warm-up note: {err}")
-    threading.Thread(target=_warmup_models, daemon=True).start()
+    # Ensure uploads directory exists
+    UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
 
     app = FastAPI(title="NumiIT API", version="0.1.0")
-
-    @app.middleware("http")
-    async def add_private_network_access_header(request, call_next):
-        response = await call_next(request)
-        if request.headers.get("access-control-request-private-network"):
-            response.headers["Access-Control-Allow-Private-Network"] = "true"
-        return response
-
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
@@ -164,12 +148,6 @@ def create_app() -> FastAPI:
     )
     app.include_router(api_router, prefix="/api/v1")
 
-    @app.get("/health", tags=["health"])
-    def health_root() -> dict[str, str]:
-        return {"status": "ok"}
-
-    # Ensure uploads directory exists
-    UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
     # Serve uploads
     app.mount("/uploads", StaticFiles(directory=UPLOADS_DIR), name="uploads")
 

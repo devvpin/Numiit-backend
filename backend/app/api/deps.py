@@ -70,7 +70,6 @@ def get_current_user_optional(
 
     return db.query(User).filter(User.email == email.lower()).first()
 
-
 def get_current_admin_user(
     current_user: User = Depends(get_current_user),
 ) -> User:
@@ -80,4 +79,3 @@ def get_current_admin_user(
             detail="Not authorized. Admin access required.",
         )
     return current_user
-
