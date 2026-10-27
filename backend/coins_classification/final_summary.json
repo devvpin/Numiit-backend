@@ -1,0 +1,203 @@
+{
+    "method": "Method 1: Domain-Informed Genealogical Disambiguation Engine",
+    "total_test_coins": 93,
+    "classes_count": 27,
+    "baseline_accuracy": 0.7204301075268817,
+    "top1_accuracy": 0.7526881720430108,
+    "top1_correct": 70,
+    "top3_accuracy": 0.8064516129032258,
+    "disambiguations_applied": 3,
+    "disambiguations_detail": [
+        {
+            "coin_idx": 11,
+            "coin_id": "12.jpg",
+            "rule": "Patronymic: Damasena (Uncle) vs Damajadasri II (Ksatrapa Nephew)",
+            "original_pred": "Damasena",
+            "new_pred": "Damajadasri II",
+            "true_king": "Damajadasri II",
+            "is_correct": true
+        },
+        {
+            "coin_idx": 82,
+            "coin_id": "10.jpg",
+            "rule": "Patronymic/Title: Visvasena (Ksatrapa) vs Simhasena (Late Mahaksatrapa)",
+            "original_pred": "Simhasena",
+            "new_pred": "Visvasena",
+            "true_king": "Visvasena",
+            "is_correct": true
+        },
+        {
+            "coin_idx": 90,
+            "coin_id": "5.jpg",
+            "rule": "Patronymic: Damasenaputrasa Brothers (Vijayasena vs Yasodaman I)",
+            "original_pred": "Vijayasena",
+            "new_pred": "Yasodaman I",
+            "true_king": "Yasodaman I",
+            "is_correct": true
+        }
+    ],
+    "per_king_stats": [
+        {
+            "king": "Bhartrdaman",
+            "total": 3,
+            "correct": 2,
+            "accuracy_pct": 66.66666666666666
+        },
+        {
+            "king": "Chastana",
+            "total": 6,
+            "correct": 4,
+            "accuracy_pct": 66.66666666666666
+        },
+        {
+            "king": "Damajadasri I",
+            "total": 1,
+            "correct": 1,
+            "accuracy_pct": 100.0
+        },
+        {
+            "king": "Damajadasri II",
+            "total": 3,
+            "correct": 3,
+            "accuracy_pct": 100.0
+        },
+        {
+            "king": "Damajadasri III",
+            "total": 3,
+            "correct": 2,
+            "accuracy_pct": 66.66666666666666
+        },
+        {
+            "king": "Damasena",
+            "total": 3,
+            "correct": 1,
+            "accuracy_pct": 33.33333333333333
+        },
+        {
+            "king": "Damazada II",
+            "total": 3,
+            "correct": 2,
+            "accuracy_pct": 66.66666666666666
+        },
+        {
+            "king": "Isvaradatta",
+            "total": 3,
+            "correct": 3,
+            "accuracy_pct": 100.0
+        },
+        {
+            "king": "Jayadaman",
+            "total": 1,
+            "correct": 1,
+            "accuracy_pct": 100.0
+        },
+        {
+            "king": "Jivadaman",
+            "total": 3,
+            "correct": 2,
+            "accuracy_pct": 66.66666666666666
+        },
+        {
+            "king": "Prithvisena",
+            "total": 2,
+            "correct": 2,
+            "accuracy_pct": 100.0
+        },
+        {
+            "king": "Rudradaman I",
+            "total": 3,
+            "correct": 2,
+            "accuracy_pct": 66.66666666666666
+        },
+        {
+            "king": "Rudrasena I",
+            "total": 11,
+            "correct": 9,
+            "accuracy_pct": 81.81818181818183
+        },
+        {
+            "king": "Rudrasena II",
+            "total": 5,
+            "correct": 5,
+            "accuracy_pct": 100.0
+        },
+        {
+            "king": "Rudrasena III",
+            "total": 5,
+            "correct": 5,
+            "accuracy_pct": 100.0
+        },
+        {
+            "king": "Rudrasena IV",
+            "total": 3,
+            "correct": 1,
+            "accuracy_pct": 33.33333333333333
+        },
+        {
+            "king": "Rudrasimha I",
+            "total": 4,
+            "correct": 1,
+            "accuracy_pct": 25.0
+        },
+        {
+            "king": "Rudrasimha II",
+            "total": 3,
+            "correct": 3,
+            "accuracy_pct": 100.0
+        },
+        {
+            "king": "Rudrasimha III",
+            "total": 3,
+            "correct": 3,
+            "accuracy_pct": 100.0
+        },
+        {
+            "king": "Satyadaman",
+            "total": 2,
+            "correct": 2,
+            "accuracy_pct": 100.0
+        },
+        {
+            "king": "Simhasena",
+            "total": 3,
+            "correct": 1,
+            "accuracy_pct": 33.33333333333333
+        },
+        {
+            "king": "Vijayasena",
+            "total": 6,
+            "correct": 5,
+            "accuracy_pct": 83.33333333333334
+        },
+        {
+            "king": "Viradaman",
+            "total": 3,
+            "correct": 1,
+            "accuracy_pct": 33.33333333333333
+        },
+        {
+            "king": "Visvasena",
+            "total": 3,
+            "correct": 3,
+            "accuracy_pct": 100.0
+        },
+        {
+            "king": "Visvasimha",
+            "total": 3,
+            "correct": 3,
+            "accuracy_pct": 100.0
+        },
+        {
+            "king": "Yasodaman I",
+            "total": 3,
+            "correct": 2,
+            "accuracy_pct": 66.66666666666666
+        },
+        {
+            "king": "Yasodaman II",
+            "total": 2,
+            "correct": 1,
+            "accuracy_pct": 50.0
+        }
+    ]
+}

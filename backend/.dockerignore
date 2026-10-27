@@ -1,0 +1,11 @@
+.venv
+__pycache__
+*.pyc
+.git
+.env
+uploads/
+numiit_backend.egg-info/
+alembic/versions/
+alembic.ini
+*.sqlite3
+*.db
